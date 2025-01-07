@@ -1,5 +1,7 @@
 #include<stdio.h>
+#include <string.h>
 
+#define MAX_LENGTH 100
 
 // Recherche dans le tableau des clients par nom
 void rechercherClient(Client clients[], int taille) {
