@@ -126,13 +126,13 @@ void suppression(Client clients[], int *taille) {
 
 // Fonction pour supprimer une ligne de la table transaction
 
-void suppression(Client clients[], int *taille) {
+void suppression(Transaction transactions[], int *taille) {
 
     int id_suppression, index = -1;
 
 
 
-    printf("Quelle est l'ID du client que vous voulez supprimer ? ");
+    printf("Quelle est l'ID de la ligne que vous voulez supprimer ? ");
 
     scanf("%d", &id_suppression);
 
@@ -150,11 +150,11 @@ void suppression(Client clients[], int *taille) {
 
 
 
-    // Rechercher l'index du client à supprimer
+    // Rechercher l'index de la ligne à supprimer
 
     for (int i = 0; i < *taille; i++) {
 
-        if (clients[i].id == id_suppression) {
+        if (transactions[i].id == id_suppression) {
 
             index = i;
 
@@ -170,25 +170,25 @@ void suppression(Client clients[], int *taille) {
 
     if (index == -1) {
 
-        printf("Erreur : Aucun client trouvé avec l'ID %d.\n", id_suppression);
+        printf("Erreur : Aucune ligne trouvée avec l'ID %d.\n", id_suppression);
 
         return;
 
     }
 
-    printf("Le client avec l'ID %d a été supprimé avec succès.\n", id_suppression);
+    printf("La ligne avec l'ID %d a été supprimé avec succès.\n", id_suppression);
 
 }
 
-// Fonction pour supprimer un client de la table
+// Fonction pour supprimer une ligne de la table voitures
 
-void suppression(Client clients[], int *taille) {
+void suppression(Voiture voitures[], int *taille) {
 
     int id_suppression, index = -1;
 
 
 
-    printf("Quelle est l'ID du client que vous voulez supprimer ? ");
+    printf("Quelle est l'ID de la ligne que vous voulez supprimer ? ");
 
     scanf("%d", &id_suppression);
 
@@ -206,11 +206,11 @@ void suppression(Client clients[], int *taille) {
 
 
 
-    // Rechercher l'index du client à supprimer
+    // Rechercher l'index de la ligne à supprimer
 
     for (int i = 0; i < *taille; i++) {
 
-        if (clients[i].id == id_suppression) {
+        if (voitures[i].id == id_suppression) {
 
             index = i;
 
@@ -226,12 +226,12 @@ void suppression(Client clients[], int *taille) {
 
     if (index == -1) {
 
-        printf("Erreur : Aucun client trouvé avec l'ID %d.\n", id_suppression);
+        printf("Erreur : Aucune ligne trouvée avec l'ID %d.\n", id_suppression);
 
         return;
 
     }
 
-    printf("Le client avec l'ID %d a été supprimé avec succès.\n", id_suppression);
+    printf("La ligne avec l'ID %d a été supprimé avec succès.\n", id_suppression);
 
 }
