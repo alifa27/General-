@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #define MAX_LENGTH 100
 #define MAX_CLIENTS 50
@@ -15,6 +16,13 @@ typedef struct {
     int achat;    // boolean (0 ou 1)
 } Clients;
 
+// Fonction pour convertir une chaîne en minuscules
+void LowerCase(char *str) {
+    for (int i = 0; str[i]; i++) {
+        str[i] = tolower(str[i]);
+    }
+}
+
 // Fonction pour insérer un nouveau client dans la liste
 Clients insert_client(Clients clients[], int *size) {
     if (*size >= MAX_CLIENTS) {
@@ -24,24 +32,28 @@ Clients insert_client(Clients clients[], int *size) {
  
     Clients new_client;
 
-    // Demande les données qui permette de remplir la structure à l'utilisateur
+    // Demande les données qui permettent de remplir la structure à l'utilisateur
     printf("Entrez l'ID du client : ");
     scanf("%d", &new_client.id);
 
     printf("Entrez le nom du client : ");
     scanf(" %[^\n]", new_client.nom);
+    LowerCase(new_client.nom); // Convertit le nom en minuscules
 
     printf("Entrez le prénom du client : ");
     scanf(" %[^\n]", new_client.prenom);
+    LowerCase(new_client.prenom); // Convertit le prénom en minuscules
 
     printf("Entrez l'adresse du client : ");
     scanf(" %[^\n]", new_client.adresse);
+    LowerCase(new_client.adresse); // Convertit l'adresse en minuscules
 
     printf("Entrez le téléphone du client : ");
     scanf(" %[^\n]", new_client.telephone);
 
     printf("Entrez l'email du client : ");
     scanf(" %[^\n]", new_client.email);
+    LowerCase(new_client.email); // Convertit l'email en minuscules
 
     printf("Le client loue-t-il actuellement une voiture ? (1 = oui, 0 = non) : ");
     scanf("%d", &new_client.location);
