@@ -1,4 +1,7 @@
 #include<stdio.h>
+#include <string.h>
+
+#define MAX_LENGTH 100
 
 // Recherche dans le tableau des transactions par ID
 void rechercherTransaction(Transaction transactions[], int taille) {
