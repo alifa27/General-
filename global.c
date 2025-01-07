@@ -120,24 +120,6 @@ void suppression(Client clients[], int *taille) {
 
     }
 
-
-
-    // Décaler les éléments suivants pour combler l'espace
-
-    for (int i = index; i < *taille - 1; i++) {
-
-        clients[i] = clients[i + 1];
-
-    }
-
-
-
-    // Réduire la taille de la table
-
-    (*taille)--;
-
-
-
     printf("Le client avec l'ID %d a été supprimé avec succès.\n", id_suppression);
 
 }
