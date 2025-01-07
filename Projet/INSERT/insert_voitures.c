@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #define MAX_LENGTH 100
 #define MAX_VOITURES 50
@@ -17,6 +18,13 @@ typedef struct {
     int puissance;
 } Voiture;
 
+// Fonction pour convertir une chaîne en minuscules
+void LowerCase(char *str) {
+    for (int i = 0; str[i]; i++) {
+        str[i] = tolower(str[i]);
+    }
+}
+
 // Fonction pour insérer une nouvelle voiture dans la liste
 Voiture insert_voiture(Voiture voitures[], int *size) {
     if (*size >= MAX_VOITURES) {
@@ -32,9 +40,11 @@ Voiture insert_voiture(Voiture voitures[], int *size) {
 
     printf("Entrez la marque de la voiture : ");
     scanf(" %[^\n]", new_voiture.marque);
+    LowerCase(new_voiture.marque); // Convertit en minuscules
 
     printf("Entrez le modèle de la voiture : ");
     scanf(" %[^\n]", new_voiture.modele);
+    LowerCase(new_voiture.modele); // Convertit en minuscules
 
     printf("Entrez l'année de la voiture : ");
     scanf("%d", &new_voiture.annee);
