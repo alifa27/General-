@@ -10,7 +10,7 @@
 
 void interpreteur_commande(char commande[TAILLE_COM]);
 
-void suppression(Client clients[], int *taille);
+Client suppression(Client clients[], int *taille);
 
 
 
@@ -70,10 +70,10 @@ void interpreteur_commande(char commande[TAILLE_COM]) {
 
 // Fonction pour supprimer une ligne de la table client
 
-void suppression(Client clients[], int *taille) {
+Client suppression(Client clients[], int *taille) {
 
     int id_suppression, index = -1;
-
+    Client new_client;
 
 
     printf("Quelle est l'ID de la ligne que vous voulez supprimer ? ");
@@ -88,7 +88,6 @@ void suppression(Client clients[], int *taille) {
 
         printf("Erreur : l'ID doit être supérieur à 0.\n");
 
-        return;
 
     }
 
@@ -116,20 +115,19 @@ void suppression(Client clients[], int *taille) {
 
         printf("Erreur : Aucune ligne trouvée avec l'ID %d.\n", id_suppression);
 
-        return;
 
     }
 
     printf("La ligne avec l'ID %d a été supprimé avec succès.\n", id_suppression);
-
+    return new_client
 }
 
 // Fonction pour supprimer une ligne de la table transaction
 
-void suppression(Transaction transactions[], int *taille) {
+Transaction suppression(Transaction transactions[], int *taille) {
 
     int id_suppression, index = -1;
-
+    Transaction new_transaction;
 
 
     printf("Quelle est l'ID de la ligne que vous voulez supprimer ? ");
@@ -144,7 +142,7 @@ void suppression(Transaction transactions[], int *taille) {
 
         printf("Erreur : l'ID doit être supérieur à 0.\n");
 
-        return;
+      
 
     }
 
@@ -172,19 +170,20 @@ void suppression(Transaction transactions[], int *taille) {
 
         printf("Erreur : Aucune ligne trouvée avec l'ID %d.\n", id_suppression);
 
-        return;
+      
 
     }
 
     printf("La ligne avec l'ID %d a été supprimé avec succès.\n", id_suppression);
-
+    return new_transaction
 }
 
 // Fonction pour supprimer une ligne de la table voitures
 
-void suppression(Voiture voitures[], int *taille) {
+Voiture suppression(Voiture voitures[], int *taille) {
 
     int id_suppression, index = -1;
+    Voiture new_voiture;
 
 
 
@@ -200,7 +199,7 @@ void suppression(Voiture voitures[], int *taille) {
 
         printf("Erreur : l'ID doit être supérieur à 0.\n");
 
-        return;
+      
 
     }
 
@@ -228,10 +227,165 @@ void suppression(Voiture voitures[], int *taille) {
 
         printf("Erreur : Aucune ligne trouvée avec l'ID %d.\n", id_suppression);
 
-        return;
+      
 
     }
 
     printf("La ligne avec l'ID %d a été supprimé avec succès.\n", id_suppression);
+    return new_transaction;
+}
+
+
+void COMPARAISON(char token)
+
+{
+
+	char attribut, commande;
+
+		
+
+	if (strcmp(token,FROM) == 0)
+
+		if (FROM(*attribut) == 1)
+
+			if (strcmp(token,id) == 0)
+
+				attribut = id;
+
+			if (strcmp(token,nom) == 0)
+
+				attribut = nom;
+
+			if (strcmp(token,prenom) == 0)
+
+				attribut = prenom;
+
+			if (strcmp(token,adresse) == 0)
+
+				attribut = adresse;
+
+			if (strcmp(token,telephone) == 0)
+
+				attribut = telephone;
+
+			if (strcmp(token,email) == 0)
+
+				attribut = email;
+
+			if (strcmp(token,location) == 0)
+
+				attribut = location;
+
+			if (strcmp(token,achat) == 0)
+
+				attribut = achat;
+
+
+
+			else
+
+				printf("Attribut non présent dans la table 1\n");
+
+				
+
+			SELECT(Client clients[]);	
+
+						
+
+			
+
+		if (FROM(*attribut) == 2)
+
+			if (strcmp(token,id) == 0)
+
+				attribut = id;
+
+			if (strcmp(token,nom) == 0)
+
+				attribut = nom;
+
+			if (strcmp(token,prenom) == 0)
+
+				attribut = prenom;
+
+			if (strcmp(token,adresse) == 0)
+
+				attribut = adresse;
+
+			if (strcmp(token,telephone) == 0)
+
+				attribut = telephone;
+
+			if (strcmp(token,email) == 0)
+
+				attribut = email;
+
+			if (strcmp(token,location) == 0)
+
+				attribut = location;
+
+			if (strcmp(token,achat) == 0)
+
+				attribut = achat;
+
+				
+
+			else
+
+				printf("Attribut non présent dans la table 2\n");
+
+				
+
+			SELECT(Transaction transactions[]);
+
+			
+
+		if (FROM(*attribut) == 3)
+
+			if (strcmp(token,id) == 0)
+
+				attribut = id;
+
+			if (strcmp(token,nom) == 0)
+
+				attribut = nom;
+
+			if (strcmp(token,prenom) == 0)
+
+				attribut = prenom;
+
+			if (strcmp(token,adresse) == 0)
+
+				attribut = adresse;
+
+			if (strcmp(token,telephone) == 0)
+
+				attribut = telephone;
+
+			if (strcmp(token,email) == 0)
+
+				attribut = email;
+
+			if (strcmp(token,location) == 0)
+
+				attribut = location;
+
+			if (strcmp(token,achat) == 0)
+
+				attribut = achat;
+
+				
+
+			else
+
+				printf("Attribut non présent dans la table 3\n");	
+
+			
+
+			SELECT(Voiture voitures[]);
+
+		
+
+
 
 }

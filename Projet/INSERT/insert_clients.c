@@ -14,7 +14,7 @@ typedef struct {
     char email[MAX_LENGTH];
     int location; // boolean (0 ou 1)
     int achat;    // boolean (0 ou 1)
-} Clients;
+} Client;
 
 // Fonction pour convertir une chaîne en minuscules
 void LowerCase(char *str) {
