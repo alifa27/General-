@@ -1,4 +1,6 @@
-#include <stdio.h>
+#include<stdio.h>
+#include <string.h>
+#define MAX_LENGTH 100
 
 // Recherche dans le tableau des voitures par immatriculation
 void rechercherVoiture(Voiture voitures[], int taille) {
