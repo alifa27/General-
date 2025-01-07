@@ -234,3 +234,158 @@ Voiture suppression(Voiture voitures[], int *taille) {
     printf("La ligne avec l'ID %d a été supprimé avec succès.\n", id_suppression);
     return new_transaction;
 }
+
+
+void COMPARAISON(char token)
+
+{
+
+	char attribut, commande;
+
+		
+
+	if (strcmp(token,FROM) == 0)
+
+		if (FROM(*attribut) == 1)
+
+			if (strcmp(token,id) == 0)
+
+				attribut = id;
+
+			if (strcmp(token,nom) == 0)
+
+				attribut = nom;
+
+			if (strcmp(token,prenom) == 0)
+
+				attribut = prenom;
+
+			if (strcmp(token,adresse) == 0)
+
+				attribut = adresse;
+
+			if (strcmp(token,telephone) == 0)
+
+				attribut = telephone;
+
+			if (strcmp(token,email) == 0)
+
+				attribut = email;
+
+			if (strcmp(token,location) == 0)
+
+				attribut = location;
+
+			if (strcmp(token,achat) == 0)
+
+				attribut = achat;
+
+
+
+			else
+
+				printf("Attribut non présent dans la table 1\n");
+
+				
+
+			SELECT(Client clients[]);	
+
+						
+
+			
+
+		if (FROM(*attribut) == 2)
+
+			if (strcmp(token,id) == 0)
+
+				attribut = id;
+
+			if (strcmp(token,nom) == 0)
+
+				attribut = nom;
+
+			if (strcmp(token,prenom) == 0)
+
+				attribut = prenom;
+
+			if (strcmp(token,adresse) == 0)
+
+				attribut = adresse;
+
+			if (strcmp(token,telephone) == 0)
+
+				attribut = telephone;
+
+			if (strcmp(token,email) == 0)
+
+				attribut = email;
+
+			if (strcmp(token,location) == 0)
+
+				attribut = location;
+
+			if (strcmp(token,achat) == 0)
+
+				attribut = achat;
+
+				
+
+			else
+
+				printf("Attribut non présent dans la table 2\n");
+
+				
+
+			SELECT(Transaction transactions[]);
+
+			
+
+		if (FROM(*attribut) == 3)
+
+			if (strcmp(token,id) == 0)
+
+				attribut = id;
+
+			if (strcmp(token,nom) == 0)
+
+				attribut = nom;
+
+			if (strcmp(token,prenom) == 0)
+
+				attribut = prenom;
+
+			if (strcmp(token,adresse) == 0)
+
+				attribut = adresse;
+
+			if (strcmp(token,telephone) == 0)
+
+				attribut = telephone;
+
+			if (strcmp(token,email) == 0)
+
+				attribut = email;
+
+			if (strcmp(token,location) == 0)
+
+				attribut = location;
+
+			if (strcmp(token,achat) == 0)
+
+				attribut = achat;
+
+				
+
+			else
+
+				printf("Attribut non présent dans la table 3\n");	
+
+			
+
+			SELECT(Voiture voitures[]);
+
+		
+
+
+
+}
