@@ -7,51 +7,45 @@
 #include <ctype.h>
 #include <time.h>
 
-/*-------------------------------------------Entête-------------------------------------------*/
+/*------------------------------------------------Entête-----------------------------------------------*/
 
 void initialize_header(void) {
-    // Initialiser l'en-tête
+    // Structure de l'en-tête
     Header header;
     time_t t = time(NULL);
     struct tm *tm = localtime(&t);
 
-    // Remplir l'en-tête
-    header.lastUpdateYear = tm->tm_year + 1900; // Année actuelle
-    header.lastUpdateMonth = tm->tm_mon + 1;    // Mois actuel
-    header.lastUpdateDay = tm->tm_mday;         // Jour actuel
-    header.nbRecords = 0;                       // Pas d'enregistrements initialement
-    header.lengthHeader = sizeof(Header);       // Taille de l'en-tête
-    
-    //client
-    FILE *fichier_clients = fopen("client.dat", "wb");
-    if (!fichier_clients) {
-        perror("Erreur d'ouverture du fichier");
-        return;
+    // Remplir l'en-tête avec des valeurs par défaut
+    header.lastUpdateYear = tm->tm_year + 1900;
+    header.lastUpdateMonth = tm->tm_mon + 1;
+    header.lastUpdateDay = tm->tm_mday;
+    header.nbRecords = 0;
+    header.lengthHeader = sizeof(Header);
+
+    char *files[] = {"client.dat", "transaction.dat", "voiture.dat"};
+    size_t record_sizes[] = {sizeof(Client), sizeof(Transaction), sizeof(Voiture)};
+
+    for (int i = 0; i < 3; ++i) {
+        FILE *file = fopen(files[i], "rb");
+        if (file) {
+            // Le fichier existe, pas besoin de le recréer
+            fclose(file);
+            continue;
+        }
+
+        // Créer le fichier et initialiser l'en-tête
+        file = fopen(files[i], "wb");
+        if (!file) {
+            perror("Erreur lors de la création du fichier");
+            continue;
+        }
+
+        header.lengthRecord = record_sizes[i];
+        fwrite(&header, sizeof(Header), 1, file);
+        fclose(file);
     }
-    header.lengthRecord = sizeof(Client);       // Taille d'un enregistrement : Client
-    fwrite(&header, sizeof(Header), 1, fichier_clients);
-    fclose(fichier_clients);
-    
-    //transaction
-    FILE *fichier_transactions = fopen("transaction.dat", "wb");
-    if (!fichier_transactions) {
-        perror("Erreur d'ouverture du fichier");
-        return;
-    }
-    header.lengthRecord = sizeof(Transaction);       // Taille d'un enregistrement : Transaction
-    fwrite(&header, sizeof(Header), 1, fichier_transactions);
-    fclose(fichier_transactions);
-    
-    //voiture
-    FILE *fichier_voitures = fopen("voiture.dat", "wb");
-    if (!fichier_voitures) {
-        perror("Erreur d'ouverture du fichier");
-        return;
-    }
-    header.lengthRecord = sizeof(Voiture);       // Taille d'un enregistrement : Voiture
-    fwrite(&header, sizeof(Header), 1, fichier_voitures);
-    fclose(fichier_voitures);
 }
+
 
 
 void update_header(char *filename, int nbRecords){
@@ -548,59 +542,366 @@ void deleteToStorageV(const char *immatriculation) {
     fclose(fichier_voitures);
 }
 
+/*------------------------------------------------modification-------------------------------------------------*/
+
+//Modif de la structure clients, demande a l'user a chaque étape
+
+
+// Sauvegarder les modifications pour un client
+void saveToStorageC(int id) {
+    int size;
+    Client* clients = charger_clients(&size);
+    printf("nom avant :%s",clients[id-1].nom);
+    if (modify_client(clients, id, size)) {
+        FILE *fichier_clients = fopen("client.dat", "r+b");
+        if (!fichier_clients) {
+            perror("Erreur lors de l'ouverture du fichier clients");
+            return;
+        }
+        printf("nom après :%s",clients[id-1].nom);
+
+        Header header;
+        fread(&header, sizeof(Header), 1, fichier_clients);
+
+        if (id < 1 || id > header.nbRecords) {
+            printf("ID de client invalide : %d\n", id);
+            fclose(fichier_clients);
+            return;
+        }
+
+        fseek(fichier_clients, header.lengthHeader + (id - 1) * header.lengthRecord, SEEK_SET);
+        fwrite(&clients[id - 1], sizeof(Client), 1, fichier_clients);
+        printf("Client avec ID %d sauvegardé avec succès.\n", id);
+
+        fclose(fichier_clients);
+    } else {
+        printf("Modification du client ID %d échouée.\n", id);
+    }
+}
+
+// Sauvegarder les modifications pour une transaction
+void saveToStorageT(int id_transaction) {
+    int size;
+    Transaction* transactions = charger_transactions(&size);
+    if (modify_transaction(transactions, id_transaction, size)) {
+        FILE *fichier_transactions = fopen("transaction.dat", "r+b");
+        if (!fichier_transactions) {
+            perror("Erreur lors de l'ouverture du fichier transactions");
+            return;
+        }
+
+        Header header;
+        fread(&header, sizeof(Header), 1, fichier_transactions);
+
+        if (id_transaction < 1 || id_transaction > header.nbRecords) {
+            printf("ID de transaction invalide : %d\n", id_transaction);
+            fclose(fichier_transactions);
+            return;
+        }
+
+        fseek(fichier_transactions, header.lengthHeader + (id_transaction - 1) * header.lengthRecord, SEEK_SET);
+        fwrite(&transactions[id_transaction - 1], sizeof(Transaction), 1, fichier_transactions);
+        printf("Transaction avec ID %d sauvegardée avec succès.\n", id_transaction);
+
+        fclose(fichier_transactions);
+    } else {
+        printf("Modification de la transaction ID %d échouée.\n", id_transaction);
+    }
+}
+
+// Sauvegarder les modifications pour une voiture
+void saveToStorageV(const char* immatriculation) {
+    int size;
+    Voiture* voitures = charger_voitures(&size);
+    if (modify_voiture(voitures, immatriculation, size)) {
+        FILE *fichier_voitures = fopen("voiture.dat", "r+b");
+        if (!fichier_voitures) {
+            perror("Erreur lors de l'ouverture du fichier voitures");
+            return;
+        }
+
+        Header header;
+        fread(&header, sizeof(Header), 1, fichier_voitures);
+
+        int position = -1;
+
+        // Rechercher la voiture par immatriculation
+        Voiture temp_voiture;
+        for (int i = 0; i < header.nbRecords; i++) {
+            fread(&temp_voiture, sizeof(Voiture), 1, fichier_voitures);
+            if (strcmp(temp_voiture.immatriculation, immatriculation) == 0) {
+                position = i;
+                break;
+            }
+        }
+
+        if (position == -1) {
+            printf("Aucune voiture trouvée avec l'immatriculation %s.\n", immatriculation);
+            fclose(fichier_voitures);
+            return;
+        }
+
+        fseek(fichier_voitures, header.lengthHeader + position * header.lengthRecord, SEEK_SET);
+        fwrite(&voitures[position], sizeof(Voiture), 1, fichier_voitures);
+        printf("Voiture avec immatriculation %s sauvegardée avec succès.\n", immatriculation);
+
+        fclose(fichier_voitures);
+    } else {
+        printf("Modification de la voiture avec immatriculation %s échouée.\n", immatriculation);
+    }
+}
 
 
 
-
-int delete_client(Client clients[], int id) {
-	int size;
-	clients = charger_clients(&size);
+int modify_client(Client clients[], int id, int size) {
     for (int i = 0; i < size; i++) {
         if (clients[i].id == id && clients[i].status == ' ') {
-            clients[i].status = '*'; // Marque comme supprimé
+            printf("Modification des informations du client ID %d:\n", id);
+
+            char new_value[MAX_LENGTH];
+
+            // Modifier le nom
+            printf("Nom actuel: %s, Nouveau nom: ", clients[i].nom);
+            do {
+                if (fgets(new_value, MAX_LENGTH, stdin)) {
+                    new_value[strcspn(new_value, "\n")] = '\0'; // Supprimer le \n
+                }
+            } while (strlen(new_value) == 0); // Demander tant que la saisie est vide
+            strncpy(clients[i].nom, new_value, MAX_LENGTH);
+
+            // Modifier le prénom
+            printf("Prénom actuel: %s, Nouveau prénom: ", clients[i].prenom);
+            do {
+                if (fgets(new_value, MAX_LENGTH, stdin)) {
+                    new_value[strcspn(new_value, "\n")] = '\0';
+                }
+            } while (strlen(new_value) == 0);
+            strncpy(clients[i].prenom, new_value, MAX_LENGTH);
+
+            // Modifier l'adresse
+            printf("Adresse actuelle: %s, Nouvelle adresse: ", clients[i].adresse);
+            do {
+                if (fgets(new_value, MAX_LENGTH, stdin)) {
+                    new_value[strcspn(new_value, "\n")] = '\0';
+                }
+            } while (strlen(new_value) == 0);
+            strncpy(clients[i].adresse, new_value, MAX_LENGTH);
+
+            // Modifier le téléphone
+            printf("Téléphone actuel: %s, Nouveau téléphone: ", clients[i].telephone);
+            do {
+                if (fgets(new_value, MAX_LENGTH, stdin)) {
+                    new_value[strcspn(new_value, "\n")] = '\0';
+                }
+            } while (strlen(new_value) == 0);
+            strncpy(clients[i].telephone, new_value, MAX_LENGTH);
+
+            // Modifier l'email
+            printf("Email actuel: %s, Nouvel email: ", clients[i].email);
+            do {
+                if (fgets(new_value, MAX_LENGTH, stdin)) {
+                    new_value[strcspn(new_value, "\n")] = '\0';
+                }
+            } while (strlen(new_value) == 0);
+            strncpy(clients[i].email, new_value, MAX_LENGTH);
+
+            // Modifier le statut de location
+            printf("Location actuelle: %d, Nouvelle valeur (0 ou 1): ", clients[i].location);
+            fgets(new_value, MAX_LENGTH, stdin);
+            clients[i].location = atoi(new_value);
+
+            // Modifier le statut d'achat
+            printf("Achat actuel: %d, Nouvelle valeur (0 ou 1): ", clients[i].achat);
+            fgets(new_value, MAX_LENGTH, stdin);
+            clients[i].achat = atoi(new_value);
+
             return 1; // Succès
         }
     }
     return 0; // Échec : ID non trouvé ou déjà supprimé
 }
 
-
-int delete_transaction(Transaction transactions[], int id_transaction) {
-    int size;
-	transactions = charger_transactions(&size);    
+int modify_transaction(Transaction transactions[], int id_transaction, int size) {
     for (int i = 0; i < size; i++) {
         if (transactions[i].id_transaction == id_transaction && transactions[i].status == ' ') {
-            // Récupère les clés étrangères avant suppression
-            //int id_client = transactions[i].id_client;
-            //char immatriculation[MAX_LENGTH];
-            //snprintf(immatriculation, MAX_LENGTH, "%s", transactions[i].immatriculation_voiture);
+            printf("Modification des informations de la transaction ID %d:\n", id_transaction);
 
-            // Marque la transaction comme supprimée
-            transactions[i].status = '*';
+            char new_value[MAX_LENGTH];
 
-            // Appelle les fonctions de suppression associées -> on verra plus tard
-            //suppr_voitures(immatriculation);
-            //suppr_clients(id_client);
+            // Modifier l'ID client
+            printf("ID client actuel: %d, Nouvel ID client: ", transactions[i].id_client);
+            do {
+                if (fgets(new_value, MAX_LENGTH, stdin)) {
+                    new_value[strcspn(new_value, "\n")] = '\0'; // Supprimer le \n
+                }
+            } while (strlen(new_value) == 0 || atoi(new_value) == 0); // Répéter si l'entrée est vide ou invalide
+            transactions[i].id_client = atoi(new_value);
+
+            // Modifier l'immatriculation de la voiture
+            printf("Immatriculation actuelle: %s, Nouvelle immatriculation: ", transactions[i].immatriculation_voiture);
+            do {
+                if (fgets(new_value, MAX_LENGTH, stdin)) {
+                    new_value[strcspn(new_value, "\n")] = '\0';
+                }
+            } while (strlen(new_value) == 0);
+            strncpy(transactions[i].immatriculation_voiture, new_value, MAX_LENGTH);
+
+            // Modifier la date de la transaction
+            printf("Date actuelle: %s, Nouvelle date: ", transactions[i].date_transaction);
+            do {
+                if (fgets(new_value, MAX_LENGTH, stdin)) {
+                    new_value[strcspn(new_value, "\n")] = '\0';
+                }
+            } while (strlen(new_value) == 0);
+            strncpy(transactions[i].date_transaction, new_value, MAX_LENGTH);
+
+            // Modifier le type de transaction
+            printf("Type actuel: %s, Nouveau type: ", transactions[i].type_transaction);
+            do {
+                if (fgets(new_value, MAX_LENGTH, stdin)) {
+                    new_value[strcspn(new_value, "\n")] = '\0';
+                }
+            } while (strlen(new_value) == 0);
+            strncpy(transactions[i].type_transaction, new_value, MAX_LENGTH);
+
+            // Modifier le montant
+            printf("Montant actuel: %d, Nouveau montant: ", transactions[i].montant);
+            do {
+                if (fgets(new_value, MAX_LENGTH, stdin)) {
+                    new_value[strcspn(new_value, "\n")] = '\0';
+                }
+            } while (strlen(new_value) == 0 || atoi(new_value) <= 0); // Répéter si l'entrée est vide ou invalide
+            transactions[i].montant = atoi(new_value);
 
             return 1; // Succès
         }
     }
-    return 0; // Échec : transaction non trouvée ou déjà supprimée
+    return 0; // Échec : ID non trouvé ou déjà supprimé
 }
 
-int delete_voiture(Voiture voitures[], const char *immatriculation) {
-	int size;
-	voitures = charger_voitures(&size); 
+int modify_voiture(Voiture voitures[], const char* immatriculation, int size) {
+
     for (int i = 0; i < size; i++) {
         if (strcmp(voitures[i].immatriculation, immatriculation) == 0 && voitures[i].status == ' ') {
-            voitures[i].status = '*'; // Marque comme supprimé
+            printf("Modification des informations de la voiture avec immatriculation %s:\n", immatriculation);
+
+            char new_value[MAX_LENGTH];
+
+            // Modifier la marque
+            printf("Marque actuelle: %s, Nouvelle marque: ", voitures[i].marque);
+            do {
+                if (fgets(new_value, MAX_LENGTH, stdin)) {
+                    new_value[strcspn(new_value, "\n")] = '\0'; // Supprimer le \n
+                }
+            } while (strlen(new_value) == 0);
+            strncpy(voitures[i].marque, new_value, MAX_LENGTH);
+
+            // Modifier le modèle
+            printf("Modèle actuel: %s, Nouveau modèle: ", voitures[i].modele);
+            do {
+                if (fgets(new_value, MAX_LENGTH, stdin)) {
+                    new_value[strcspn(new_value, "\n")] = '\0';
+                }
+            } while (strlen(new_value) == 0);
+            strncpy(voitures[i].modele, new_value, MAX_LENGTH);
+
+            // Modifier l'année
+            printf("Année actuelle: %d, Nouvelle année: ", voitures[i].annee);
+            fgets(new_value, MAX_LENGTH, stdin);
+            voitures[i].annee = atoi(new_value);
+
+            // Modifier le kilométrage
+            printf("Kilométrage actuel: %d, Nouveau kilométrage: ", voitures[i].kilometrage);
+            fgets(new_value, MAX_LENGTH, stdin);
+            voitures[i].kilometrage = atoi(new_value);
+
+            // Modifier le prix de vente
+            printf("Prix de vente actuel: %d, Nouveau prix de vente: ", voitures[i].prix_vente);
+            fgets(new_value, MAX_LENGTH, stdin);
+            voitures[i].prix_vente = atoi(new_value);
+
+            // Modifier le prix de location par jour
+            printf("Prix de location actuel: %d, Nouveau prix de location: ", voitures[i].prix_location_par_jour);
+            fgets(new_value, MAX_LENGTH, stdin);
+            voitures[i].prix_location_par_jour = atoi(new_value);
+
+            // Modifier la date du contrôle technique
+            printf("Contrôle technique actuel: %s, Nouvelle date: ", voitures[i].controle_technique);
+            do {
+                if (fgets(new_value, MAX_LENGTH, stdin)) {
+                    new_value[strcspn(new_value, "\n")] = '\0';
+                }
+            } while (strlen(new_value) == 0);
+            strncpy(voitures[i].controle_technique, new_value, MAX_LENGTH);
+
+            // Modifier le statut
+            printf("Statut actuel: %d (1 = disponible, 0 = vendu), Nouveau statut: ", voitures[i].statut);
+            fgets(new_value, MAX_LENGTH, stdin);
+            voitures[i].statut = atoi(new_value);
+
+            // Modifier la puissance
+            printf("Puissance actuelle: %d, Nouvelle puissance: ", voitures[i].puissance);
+            fgets(new_value, MAX_LENGTH, stdin);
+            voitures[i].puissance = atoi(new_value);
+
             return 1; // Succès
         }
     }
     return 0; // Échec : immatriculation non trouvée ou déjà supprimée
 }
 
+
+
+/*----------------------------------------------simulation----------------------------------------*/
 void ajouter_base_de_donnees(void) {
+    // Vérification pour les clients
+    FILE *fichier_clients = fopen("client.dat", "rb");
+    if (!fichier_clients) {
+        perror("Erreur lors de l'ouverture du fichier client.dat");
+        return;
+    }
+    fseek(fichier_clients, sizeof(Header), SEEK_SET);
+    Client client;
+    if (fread(&client, sizeof(Client), 1, fichier_clients)) {
+        printf("Les données des clients sont déjà chargées.\n");
+        fclose(fichier_clients);
+        return;
+    }
+    fclose(fichier_clients);
+
+    // Vérification pour les transactions
+    FILE *fichier_transactions = fopen("transaction.dat", "rb");
+    if (!fichier_transactions) {
+        perror("Erreur lors de l'ouverture du fichier transaction.dat");
+        return;
+    }
+    fseek(fichier_transactions, sizeof(Header), SEEK_SET);
+    Transaction transaction;
+    if (fread(&transaction, sizeof(Transaction), 1, fichier_transactions)) {
+        printf("Les données des transactions sont déjà chargées.\n");
+        fclose(fichier_transactions);
+        return;
+    }
+    fclose(fichier_transactions);
+
+    // Vérification pour les voitures
+    FILE *fichier_voitures = fopen("voiture.dat", "rb");
+    if (!fichier_voitures) {
+        perror("Erreur lors de l'ouverture du fichier voiture.dat");
+        return;
+    }
+    fseek(fichier_voitures, sizeof(Header), SEEK_SET);
+    Voiture voiture;
+    if (fread(&voiture, sizeof(Voiture), 1, fichier_voitures)) {
+        printf("Les données des voitures sont déjà chargées.\n");
+        fclose(fichier_voitures);
+        return;
+    }
+    fclose(fichier_voitures);
+
+    // Ajout des données de simulation
+    printf("Ajout des données de simulation...\n");
+
     // Clients
     Client clients[] = {
         {' ', 1, "dupont", "theo", "12 allee de la marmotte", "06.19.87.55.49", "dupont.theo@firefox.fr", 1, 0},
@@ -664,4 +965,5 @@ void ajouter_base_de_donnees(void) {
 
     printf("Base de données initialisée avec succès !\n");
 }
+
 

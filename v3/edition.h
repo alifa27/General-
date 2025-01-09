@@ -30,6 +30,14 @@ void deleteToStorageC(int id);
 void deleteToStorageT(int id_transaction);
 void deleteToStorageV(const char *immatriculation);
 
+void saveToStorageC(int id);
+void saveToStorageT(int id_transaction);
+void saveToStorageV(const char* immatriculation);
+
+int modify_client(Client clients[], int id, int size);
+int modify_transaction(Transaction transactions[], int id_transaction, int size);
+int modify_voiture(Voiture voitures[], const char* immatriculation, int size);
+
 void ajouter_base_de_donnees(void);
 
 #endif
